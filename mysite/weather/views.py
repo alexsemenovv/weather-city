@@ -16,6 +16,16 @@ def city_form(request: HttpRequest) -> HttpResponse:
         form = SearchCity(request.POST)
         if form.is_valid():
             location = form.cleaned_data.get('city')
+            if "search_history" in request.session:
+                search_history = request.session["search_history"]
+            else:
+                search_history = []
+
+            search_history.append(location)
+            if len(search_history) > 10:
+                search_history = search_history[-10:]
+            request.session['search_history'] = search_history
+
             coordinates = get_location_coordinates(location=location)
             if coordinates:
                 latitude, longitude = coordinates
@@ -33,8 +43,10 @@ def city_form(request: HttpRequest) -> HttpResponse:
             return redirect(reverse("weather:result"))
     else:
         form = SearchCity()
+        search_history = request.session.get('search_history')
 
-    return render(request, 'weather/city-index.html', context={"form": form})
+    return render(request, 'weather/city-index.html',
+                  context={"form": form, "search_history": search_history})
 
 
 def get_weather_for_city(request: HttpRequest, *args) -> HttpResponse:
