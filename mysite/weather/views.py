@@ -1,7 +1,50 @@
+import json
+
+import pandas as pd
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.core.exceptions import BadRequest
+
+from .forms import SearchCity
+from .services import get_location_coordinates, get_weather_by_latitude_and_longitude
 
 
-def weather_index(request: HttpRequest) -> HttpResponse:
-    """Эндпоинт для прогноза погоды"""
-    return render(request, 'weather/weather-index.html')
+def city_form(request: HttpRequest) -> HttpResponse:
+    """Получение локации"""
+    if request.method == "POST":
+        form = SearchCity(request.POST)
+        if form.is_valid():
+            location = form.cleaned_data.get('city')
+            coordinates = get_location_coordinates(location=location)
+            if coordinates:
+                latitude, longitude = coordinates
+                weather_data = get_weather_by_latitude_and_longitude(latitude, longitude)
+                hourly_json = weather_data.get("hourly_dataframe")
+                hourly_data = json.loads(hourly_json)
+                hourly_table = pd.DataFrame(hourly_data)
+                hourly_table["date"] = pd.to_datetime(hourly_table["date"], unit="ms").dt.strftime("%Y-%m-%d %H:%M")
+                hourly_table_list = hourly_table.to_dict(orient="records")
+                request.session['weather_data'] = weather_data
+                request.session['hourly'] = hourly_table_list
+                request.session['city_name'] = location
+            else:
+                raise BadRequest(f"Location {location} is not find")
+            return redirect(reverse("weather:result"))
+    else:
+        form = SearchCity()
+
+    return render(request, 'weather/city-index.html', context={"form": form})
+
+
+def get_weather_for_city(request: HttpRequest, *args) -> HttpResponse:
+    """Получение погоды для введённой локации"""
+    weather_data = request.session.get("weather_data")
+    hourly = request.session.get("hourly")
+    city_name = request.session.get("city_name")
+    context = {
+        "weather_data": weather_data,
+        "hourly": hourly,
+        "city_name": city_name,
+    }
+    return render(request, "weather/result.html", context)
