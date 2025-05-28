@@ -18,11 +18,12 @@
 <div>
     <h2>История поиска</h2>
     <ul>
-    {% for loc in  search_history %}
-        <li>{{ loc }}</li>
-    {% endfor %}
+        {% for loc in search_history %}
+        <a href="{% url 'weather:history_result' forloop.counter0 %}">
+            <li>{{ loc.location }}</li>
+        </a>
+        {% endfor %}
     </ul>
-
 </div>
 {% endif %}
 {% endblock %}
