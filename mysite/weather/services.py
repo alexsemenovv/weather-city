@@ -1,4 +1,3 @@
-import datetime
 import os
 from typing import Optional, Dict
 
@@ -11,6 +10,14 @@ import requests_cache
 from retry_requests import retry
 
 API_KEY = os.getenv("GEOAPIFY_KEY")
+
+
+def create_session():
+    """Создание клиента сессии"""
+    cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
+    retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+    openmeteo = openmeteo_requests.Client(session=retry_session)
+    return openmeteo
 
 
 def get_location_coordinates(location: str) -> Optional[tuple]:
@@ -43,9 +50,7 @@ def get_weather_by_latitude_and_longitude(lat: float, long: float) -> Optional[D
     :param long(float) - долгота локации
     :return: Словарь с параметрами погоды найденной локации | None
     """
-    cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
-    retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
-    openmeteo = openmeteo_requests.Client(session=retry_session)
+    client = create_session()
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": lat,
@@ -53,7 +58,7 @@ def get_weather_by_latitude_and_longitude(lat: float, long: float) -> Optional[D
         "hourly": ["temperature_2m", "apparent_temperature"],
         "timezone": "auto",
     }
-    responses = openmeteo.weather_api(url, params=params)
+    responses = client.weather_api(url, params=params)
     response = responses[0]
     if not response:
         return None
