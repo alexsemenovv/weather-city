@@ -1,5 +1,23 @@
 {% extends 'weather/base.html' %}
 
+
 {% block body %}
-  <h1>Hello from weather</h1>
+<h1>Поиск локации</h1>
+<div>
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+        <button type="submit">
+            Поиск
+        </button>
+    </form>
+</div>
+
+{% if request.POST %}
+<div>
+    <h2>История поиска</h2>
+    <p>{{ request.POST.city }}</p>
+</div>
+{% endif %}
 {% endblock %}
