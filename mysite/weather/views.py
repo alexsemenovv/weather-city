@@ -31,6 +31,11 @@ def city_form(request: HttpRequest) -> HttpResponse:
                 hourly_data = json.loads(hourly_json)
                 hourly_table = pd.DataFrame(hourly_data)
                 hourly_table["date"] = pd.to_datetime(hourly_table["date"], unit="ms").dt.strftime("%Y-%m-%d %H:%M")
+                for col in hourly_table.columns:
+                    if col != "date" and col != "rain":
+                        hourly_table[col] = hourly_table[col].round(0).astype(int)
+                    elif col == "rain":
+                        hourly_table[col] = hourly_table[col].round(2).astype(float)
                 hourly_table_list = hourly_table.to_dict(orient="records")
                 request.session['weather_data'] = weather_data
                 request.session['hourly'] = hourly_table_list
@@ -84,4 +89,3 @@ def get_weather_from_history(request: HttpRequest, index: int) -> HttpResponse:
     }
 
     return render(request, "weather/result.html", context=context)
-

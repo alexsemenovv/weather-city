@@ -12,12 +12,16 @@
         <th>Время</th>
         <th>Температура (°C)</th>
         <th>Ощущается как (°C)</th>
+        <th>Ветер м/с</th>
+        <th>Дождь</th>
     </tr>
     {% for row in hourly %}
     <tr>
         <td>{{ row.date }}</td>
         <td>{{ row.temperature_2m }}</td>
         <td>{{ row.apparent_temperature }}</td>
+        <td>{{ row.wind_speed_10m }}</td>
+        <td>{{ row.rain }}</td>
     </tr>
     {% endfor %}
 </table>

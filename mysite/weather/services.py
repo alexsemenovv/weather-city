@@ -55,8 +55,9 @@ def get_weather_by_latitude_and_longitude(lat: float, long: float) -> Optional[D
     params = {
         "latitude": lat,
         "longitude": long,
-        "hourly": ["temperature_2m", "apparent_temperature"],
+        "hourly": ["temperature_2m", "apparent_temperature", "wind_speed_10m", "rain"],
         "timezone": "auto",
+        "wind_speed_unit": "ms",
     }
     responses = client.weather_api(url, params=params)
     response = responses[0]
@@ -65,6 +66,8 @@ def get_weather_by_latitude_and_longitude(lat: float, long: float) -> Optional[D
     hourly = response.Hourly()
     hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
     hourly_apparent_temperature = hourly.Variables(1).ValuesAsNumpy()
+    hourly_wind_speed_10m = hourly.Variables(2).ValuesAsNumpy()
+    hourly_rain = hourly.Variables(3).ValuesAsNumpy()
 
     hourly_data = {"date": pd.date_range(
         start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
@@ -75,6 +78,8 @@ def get_weather_by_latitude_and_longitude(lat: float, long: float) -> Optional[D
 
     hourly_data["temperature_2m"] = hourly_temperature_2m
     hourly_data["apparent_temperature"] = hourly_apparent_temperature
+    hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
+    hourly_data["rain"] = hourly_rain
 
     hourly_dataframe = pd.DataFrame(data=hourly_data)
 
