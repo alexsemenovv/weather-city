@@ -5,10 +5,10 @@ from django.http import HttpRequest, HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.exceptions import BadRequest
-from requests import session
 
 from .forms import SearchCity
 from .services import get_location_coordinates, get_weather_by_latitude_and_longitude
+from .utils import save_or_increase_count_location
 
 
 def city_form(request: HttpRequest) -> HttpResponse:
@@ -18,6 +18,8 @@ def city_form(request: HttpRequest) -> HttpResponse:
         form = SearchCity(request.POST)
         if form.is_valid():
             location = form.cleaned_data.get('city')
+            save_or_increase_count_location(location=location)
+
             if "search_history" in request.session:
                 search_history = request.session["search_history"]
             else:
