@@ -13,16 +13,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-dotenv_path = os.path.join(BASE_DIR, "..", ".env")
-if not os.path.exists(dotenv_path):
-    exit(f"Переменные окружения не загружены т.к. отсутствует файл .env")
-else:
-    load_dotenv()
+# dotenv_path = os.path.join(BASE_DIR, ".env")
+# if not os.path.exists(dotenv_path):
+#     exit(f"Переменные окружения не загружены т.к. отсутствует файл .env")
+# else:
+#     load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production
@@ -34,7 +34,7 @@ SECRET_KEY = "django-insecure-fe$jt3&gx7*pm%_2dwyfxrpxtqr1jq0!y76(76+5-6cd=(u1u+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["0.0.0.0"]
 
 
 # Application definition
@@ -127,6 +127,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
