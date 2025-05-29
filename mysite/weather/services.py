@@ -21,7 +21,7 @@ def create_session():
 
 def get_location_coordinates(location: str) -> Optional[tuple]:
     """
-
+    Получение координат, по названию локации
     :param location (str) - Название локации
     :return: Кортеж из долготы и широты | None
     """
