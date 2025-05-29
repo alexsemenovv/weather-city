@@ -1,63 +1,31 @@
-import json
-
-import pandas as pd
 from django.http import HttpRequest, HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.exceptions import BadRequest
 
 from .forms import SearchCity
-from .services import get_location_coordinates, get_weather_by_latitude_and_longitude
-from .utils import save_or_increase_count_location
+from .utils import prepare_weather_data, update_search_history
 
 
 def city_form(request: HttpRequest) -> HttpResponse:
-    """Получение локации"""
-    # request.session.delete()
+    search_history = request.session.get("search_history", [])
     if request.method == "POST":
         form = SearchCity(request.POST)
         if form.is_valid():
-            location = form.cleaned_data.get('city')
-            save_or_increase_count_location(location=location)
-
-            if "search_history" in request.session:
-                search_history = request.session["search_history"]
+            location = form.cleaned_data.get("city")
+            try:
+                weather_data, hourly_data = prepare_weather_data(location)
+            except BadRequest as e:
+                form.add_error("city", str(e))
             else:
-                search_history = []
-
-            coordinates = get_location_coordinates(location=location)
-            if coordinates:
-                latitude, longitude = coordinates
-                weather_data = get_weather_by_latitude_and_longitude(latitude, longitude)
-                hourly_json = weather_data.get("hourly_dataframe")
-                hourly_data = json.loads(hourly_json)
-                hourly_table = pd.DataFrame(hourly_data)
-                hourly_table["date"] = pd.to_datetime(hourly_table["date"], unit="ms").dt.strftime("%Y-%m-%d %H:%M")
-                for col in hourly_table.columns:
-                    if col != "date" and col != "rain":
-                        hourly_table[col] = hourly_table[col].round(0).astype(int)
-                    elif col == "rain":
-                        hourly_table[col] = hourly_table[col].round(2).astype(float)
-                hourly_table_list = hourly_table.to_dict(orient="records")
-                request.session['weather_data'] = weather_data
-                request.session['hourly'] = hourly_table_list
-                request.session['location'] = location
-                search_history.append({
-                    "weather_data": weather_data,
-                    "hourly": hourly_table_list,
-                    "location": location,
-                })
-                if len(search_history) > 10:
-                    search_history = search_history[-10:]
-                request.session['search_history'] = search_history
-            else:
-                raise BadRequest(f"Location {location} is not find")
-            return redirect(reverse("weather:result"))
+                request.session["weather_data"] = weather_data
+                request.session["hourly"] = hourly_data
+                request.session["location"] = location
+                update_search_history(request.session, location, weather_data, hourly_data)
+                return redirect(reverse("weather:result"))
     else:
         form = SearchCity()
-        search_history = request.session.get('search_history')
-    return render(request, 'weather/city-index.html',
-                  context={"form": form, "search_history": search_history})
+    return render(request, "weather/city-index.html", context={"form": form, "search_history": search_history})
 
 
 def get_weather_for_city(request: HttpRequest) -> HttpResponse:
