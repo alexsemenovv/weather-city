@@ -1,7 +1,7 @@
-from django.http import HttpRequest, HttpResponse, Http404
-from django.shortcuts import render, redirect
-from django.urls import reverse
 from django.core.exceptions import BadRequest
+from django.http import Http404, HttpRequest, HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from .forms import SearchCity
 from .utils import prepare_weather_data, update_search_history
@@ -21,11 +21,17 @@ def city_form(request: HttpRequest) -> HttpResponse:
                 request.session["weather_data"] = weather_data
                 request.session["hourly"] = hourly_data
                 request.session["location"] = location
-                update_search_history(request.session, location, weather_data, hourly_data)
+                update_search_history(
+                    request.session, location, weather_data, hourly_data
+                )
                 return redirect(reverse("weather:result"))
     else:
         form = SearchCity()
-    return render(request, "weather/city-index.html", context={"form": form, "search_history": search_history})
+    return render(
+        request,
+        "weather/city-index.html",
+        context={"form": form, "search_history": search_history},
+    )
 
 
 def get_weather_for_city(request: HttpRequest) -> HttpResponse:

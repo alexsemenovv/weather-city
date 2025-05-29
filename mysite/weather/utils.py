@@ -26,7 +26,9 @@ def save_or_increase_count_location(location: str) -> None:
     city.save()
 
 
-def update_search_history(session: SessionStore, location: str, weather_data: Dict, hourly_data: List) -> None:
+def update_search_history(
+    session: SessionStore, location: str, weather_data: Dict, hourly_data: List
+) -> None:
     """
     Обновляет историю поиска
     :param session: Сессия пользователя
@@ -36,11 +38,13 @@ def update_search_history(session: SessionStore, location: str, weather_data: Di
     :return: None
     """
     history = session.get("search_history", [])
-    history.append({
-        "location": location,
-        "weather_data": weather_data,
-        "hourly": hourly_data,
-    })
+    history.append(
+        {
+            "location": location,
+            "weather_data": weather_data,
+            "hourly": hourly_data,
+        }
+    )
     if len(history) > 10:
         history = history[-10:]
     session["search_history"] = history
@@ -63,7 +67,9 @@ def prepare_weather_data(location: str) -> tuple[dict, list[dict]]:
     hourly_json = weather_data.get("hourly_dataframe")
     hourly_data = json.loads(hourly_json)
     hourly_table = pd.DataFrame(hourly_data)
-    hourly_table["date"] = pd.to_datetime(hourly_table["date"], unit="ms").dt.strftime("%Y-%m-%d %H:%M")
+    hourly_table["date"] = pd.to_datetime(hourly_table["date"], unit="ms").dt.strftime(
+        "%Y-%m-%d %H:%M"
+    )
 
     for col in hourly_table.columns:
         if col != "date" and col != "rain":

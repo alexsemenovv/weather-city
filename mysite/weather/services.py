@@ -1,11 +1,10 @@
-import os
-from typing import Optional, Dict
-
-import requests
 import json
-import openmeteo_requests
+import os
+from typing import Dict, Optional
 
+import openmeteo_requests
 import pandas as pd
+import requests
 import requests_cache
 from retry_requests import retry
 
@@ -14,7 +13,7 @@ API_KEY = os.getenv("GEOAPIFY_KEY")
 
 def create_session():
     """Создание клиента сессии"""
-    cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
+    cache_session = requests_cache.CachedSession(".cache", expire_after=3600)
     retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
     openmeteo = openmeteo_requests.Client(session=retry_session)
     return openmeteo
@@ -26,7 +25,7 @@ def get_location_coordinates(location: str) -> Optional[tuple]:
     :param location (str) - Название локации
     :return: Кортеж из долготы и широты | None
     """
-    url = 'https://api.geoapify.com/v1/geocode/search'
+    url = "https://api.geoapify.com/v1/geocode/search"
     params = dict(
         text=location,
         apiKey=API_KEY,
@@ -34,8 +33,8 @@ def get_location_coordinates(location: str) -> Optional[tuple]:
     response = requests.get(url=url, params=params)
     if response.status_code == 200:
         data = json.loads(response.text)
-        if len(data['features']) > 0:
-            location_data = data['features'][0]['properties']
+        if len(data["features"]) > 0:
+            location_data = data["features"][0]["properties"]
             return location_data["lat"], location_data["lon"]
         else:
             return None
@@ -69,12 +68,14 @@ def get_weather_by_latitude_and_longitude(lat: float, long: float) -> Optional[D
     hourly_wind_speed_10m = hourly.Variables(2).ValuesAsNumpy()
     hourly_rain = hourly.Variables(3).ValuesAsNumpy()
 
-    hourly_data = {"date": pd.date_range(
-        start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
-        end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
-        freq=pd.Timedelta(seconds=hourly.Interval()),
-        inclusive="left"
-    )}
+    hourly_data = {
+        "date": pd.date_range(
+            start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
+            end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
+            freq=pd.Timedelta(seconds=hourly.Interval()),
+            inclusive="left",
+        )
+    }
 
     hourly_data["temperature_2m"] = hourly_temperature_2m
     hourly_data["apparent_temperature"] = hourly_apparent_temperature
@@ -87,7 +88,7 @@ def get_weather_by_latitude_and_longitude(lat: float, long: float) -> Optional[D
     result = {
         "Coordinates": {
             "latitude": response.Latitude(),
-            "longitude": response.Longitude()
+            "longitude": response.Longitude(),
         },
         "Elevation": response.Elevation(),
         "Timezone": decoded_timezone,

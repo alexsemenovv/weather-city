@@ -7,11 +7,11 @@ def validate_city(location: str) -> None:
     """Валидатор для обработки названия города"""
     if not location.isalpha():
         raise ValidationError(
-            _(f"Локация должна содержать только буквы"),
-            params={"location": location}
+            _(f"Локация должна содержать только буквы"), params={"location": location}
         )
 
 
 class SearchCity(forms.Form):
     """Форма для ввода города"""
-    city = forms.CharField(label='Название города', validators=[validate_city])
+
+    city = forms.CharField(label="Название города", validators=[validate_city])
