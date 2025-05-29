@@ -4,19 +4,23 @@
     <meta charset="UTF-8">
     <title>
         {% block title %}
-            Base Title
+        Base Title
         {% endblock %}
     </title>
 </head>
 <body>
-    {% block body %}
-        Base body
-    {% endblock %}
+{% block body %}
+    Base body
+{% endblock %}
 </body>
 
 <footer>
     <div>
-        {% now 'H:i' %}
+        {% load tz %}
+
+        {% timezone "Europe/Moscow" %}
+            {% now "H:i" %}
+        {% endtimezone %}
     </div>
 
     <div>
