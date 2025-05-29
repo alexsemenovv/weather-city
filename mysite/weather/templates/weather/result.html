@@ -10,23 +10,34 @@
 <p>Часовой пояс: {{ weather_data.Timezone }}</p>
 <p>Высота над уровнем моря: {{ weather_data.Elevation }} м</p>
 <p>Разница времени GMT+0: {{ weather_data.Timezone_diff_GMT_0 }} сек</p>
-<h3>Погода по часам</h3>
-<table>
-    <tr>
-        <th>Время</th>
-        <th>Температура (°C)</th>
-        <th>Ощущается как (°C)</th>
-        <th>Ветер м/с</th>
-        <th>Дождь</th>
-    </tr>
-    {% for row in hourly %}
-    <tr>
-        <td>{{ row.date }}</td>
-        <td>{{ row.temperature_2m }}</td>
-        <td>{{ row.apparent_temperature }}</td>
-        <td>{{ row.wind_speed_10m }}</td>
-        <td>{{ row.rain }}</td>
-    </tr>
-    {% endfor %}
-</table>
+
+<h3>Прогноз по дням</h3>
+
+{% regroup hourly by date|slice:":10" as daily_forecast %}
+
+{% for day in daily_forecast %}
+    <h4>{{ day.grouper }}</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Время</th>
+                <th>Температура (°C)</th>
+                <th>Ощущается как (°C)</th>
+                <th>Ветер м/с</th>
+                <th>Дождь (мм)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in day.list %}
+            <tr>
+                <td>{{ row.date|slice:"11:16" }}</td>
+                <td>{{ row.temperature_2m }}</td>
+                <td>{{ row.apparent_temperature }}</td>
+                <td>{{ row.wind_speed_10m }}</td>
+                <td>{{ row.rain }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
 {% endblock %}
