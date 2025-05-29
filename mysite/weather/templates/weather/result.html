@@ -6,6 +6,10 @@
 
 {% block body %}
 <h2>{{ location }}</h2>
+<p>Координаты: {{ weather_data.Coordinates.latitude }}°N  {{ weather_data.Coordinates.longitude }}°E</p>
+<p>Часовой пояс: {{ weather_data.Timezone }}</p>
+<p>Высота над уровнем моря: {{ weather_data.Elevation }} м</p>
+<p>Разница времени GMT+0: {{ weather_data.Timezone_diff_GMT_0 }} сек</p>
 <h3>Погода по часам</h3>
 <table>
     <tr>
