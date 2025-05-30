@@ -23,4 +23,4 @@ class CityListViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Moscow")
         self.assertContains(response, "Berlin")
-        self.assertEqual(response.json()['locations']['Paris'], 999)
+        self.assertEqual(response.json()["locations"]["Paris"], 999)
