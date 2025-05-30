@@ -8,6 +8,7 @@ from .utils import prepare_weather_data, update_search_history
 
 
 def city_form(request: HttpRequest) -> HttpResponse:
+    """Ввод локации для получения прогноза погоды"""
     search_history = request.session.get("search_history", [])
     if request.method == "POST":
         form = SearchCity(request.POST)
